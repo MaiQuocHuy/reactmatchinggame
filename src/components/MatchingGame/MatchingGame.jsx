@@ -4,7 +4,6 @@ import { masterItems } from "../../mock/data";
 import Header from "./Header";
 import GameOverlay from "./GameOverlay";
 import GameBoard from "./GameBoard";
-import GameNotification from "./GameNotification";
 import styles from "./MatchingGame.module.css";
 
 // Import sound files - supports both .mp3 and .wav formats
