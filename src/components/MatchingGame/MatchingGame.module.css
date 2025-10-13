@@ -1,0 +1,705 @@
+/* ===================================
+   Matching Game CSS Module
+   - All styles scoped to component
+   - Responsive design (mobile-first)
+   - Smooth animations
+   - Accessibility support
+   =================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap");
+
+/* ===================================
+   Container & Layout
+   =================================== */
+
+.gameContainer {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #dbeafe; /* blue-100 */
+  padding: 1rem;
+  box-sizing: border-box;
+  font-family: "Fredoka One", cursive, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+}
+
+/* White modal card for game content */
+.gameContent {
+  position: relative;
+  width: 100%;
+  max-width: 672px; /* max-w-2xl */
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: 90vh;
+  /* overflow: hidden;  */
+}
+
+.startGame {
+  position: relative;
+  width: 100%;
+  max-width: 672px; /* max-w-2xl */
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+  border-radius: 1rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: 90vh;
+}
+
+.endGame {
+  position: relative;
+  width: 100%;
+  max-width: 672px; /* max-w-2xl */
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+  border-radius: 1rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: 90vh;
+}
+
+@media (min-width: 640px) {
+  .gameContent {
+    padding: 1.5rem;
+  }
+}
+
+/* ===================================
+   Overlay (Start & End Screens)
+   =================================== */
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9); /* white/90 like reference */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 10;
+  border-radius: 0.75rem; /* matches gameContent border radius */
+  transition: opacity 0.5s ease-in-out;
+  padding: 2rem;
+}
+
+.overlayContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+}
+
+.overlayHeader {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  justify-content: start;
+  padding: 10px 0px 44px 0px;
+  /* gap: 1rem; */
+}
+
+.modalTitle {
+  font-size: 2.25rem;
+  /* margin: 0 0 1rem 0; */
+  color: #eab308; /* yellow-500 */
+  font-weight: 700;
+}
+
+.title {
+  font-size: 2.25rem;
+  /* margin: 0 0 1rem 0; */
+  color: #2563eb; /* blue-600 */
+  font-weight: 700;
+}
+
+@media (min-width: 640px) {
+  .title {
+    font-size: 2.5rem;
+  }
+}
+
+.subtitle {
+  font-size: 1.5rem; /* text-2xl */
+  color: #4b5563; /* gray-600 */
+  margin: 0 0 1.5rem 0;
+}
+
+.replayButton {
+  background: #22c55e; /* green-500 */
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  border-radius: 9999px; /* fully rounded */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  position: absolute;
+  bottom: -32px;
+  left: 50%; /* căn giữa ngang */
+  transform: translateX(-50%);
+}
+
+.startButton {
+  background: #22c55e; /* green-500 */
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  border-radius: 9999px; /* fully rounded */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  position: absolute;
+  bottom: -32px;
+  left: 50%; /* căn giữa ngang */
+  transform: translateX(-50%);
+}
+
+.replayButton:hover {
+  background: #16a34a; /* green-600 */
+  transform: translateX(-50%) scale(1.05); /* ✅ keep translate + scale */
+}
+
+.startButton:hover {
+  background: #16a34a; /* green-600 */
+  transform: translateX(-50%) scale(1.05); /* ✅ keep translate + scale */
+}
+
+.replayButton:active {
+  transform: translateX(-50%) scale(0.95);
+}
+
+.startButton:active {
+  transform: translateX(-50%) scale(0.95);
+}
+
+.gameOverTitle {
+  font-size: 2.25rem;
+  margin: 0 0 1rem 0;
+  color: #eab308; /* yellow-500 for win, will override for loss */
+}
+
+.finalScore {
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: #4b5563; /* gray-600 */
+  margin: 0 0 1.5rem 0;
+}
+
+/* ===================================
+   Header (Score & Timer)
+   =================================== */
+
+.header {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: #eff6ff; /* blue-50 */
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+}
+
+.scoreDisplay,
+.timerDisplay {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+@media (min-width: 640px) {
+  .scoreDisplay,
+  .timerDisplay {
+    font-size: 1.25rem;
+  }
+}
+
+.timerDisplay {
+  color: #374151; /* gray-700 */
+}
+
+.timerDisplay .label {
+  color: #eab308; /* yellow-500 */
+}
+
+.scoreDisplay {
+  color: #374151; /* gray-700 */
+}
+
+.scoreDisplay .label {
+  color: #22c55e; /* green-500 */
+}
+
+.value {
+  color: #333;
+  font-size: 1.5rem;
+  font-weight: 700;
+  min-width: 60px;
+  text-align: right;
+}
+
+/* ===================================
+   Game Board
+   =================================== */
+
+.gameBoardContainer {
+  position: relative;
+  flex: 1;
+  display: flex;
+  min-height: 150px;
+  align-items: center;
+  justify-content: center;
+}
+
+.gameBoard {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  flex: 1;
+}
+
+@media (min-width: 640px) {
+  .gameBoard {
+    gap: 1.5rem;
+  }
+}
+
+/* ===================================
+   Card Grids
+   =================================== */
+
+.gridImages,
+.gridWords {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* ===================================
+   Cards
+   =================================== */
+
+.card {
+  background: white;
+  border: none;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  height: 6rem; /* h-24 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out,
+    background-color 0.2s, opacity 0.2s;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  user-select: none;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937; /* gray-800 */
+}
+
+.card:hover:not(:disabled) {
+  transform: scale(1.05);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.card:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Emoji cards */
+.cardEmoji .emoji {
+  font-size: 3rem;
+  line-height: 1;
+  user-select: none;
+}
+
+/* Word cards */
+.cardWord .word {
+  font-size: 1.5rem; /* text-2xl */
+  font-weight: 600;
+  text-align: center;
+  color: #1f2937; /* gray-800 */
+}
+
+@media (min-width: 640px) {
+  .cardWord .word {
+    font-size: 1.875rem; /* text-3xl */
+  }
+}
+
+/* ===================================
+   Card States & Animations
+   =================================== */
+
+/* Selected state */
+.card.selected {
+  background: #60a5fa; /* blue-400 */
+  color: white;
+  transform: scale(1.1);
+  box-shadow: 0 0 0 4px #3b82f6; /* blue-500 */
+}
+
+.card.selected .word {
+  color: white;
+}
+
+/* Matched state */
+.card.matched {
+  background: #4ade80; /* green-400 */
+  color: white;
+  transform: scale(0.9);
+  opacity: 0.6;
+  pointer-events: none;
+  cursor: default;
+}
+
+.card.matched .word {
+  color: white;
+}
+
+/* Error state */
+.card.error {
+  background: #f87171; /* red-400 */
+  animation: shake 0.5s;
+}
+
+/* Replacing state (fade in/out) */
+.card.replacing {
+  transform: scale(0);
+  opacity: 0;
+}
+
+/* ===================================
+   Keyframe Animations
+   =================================== */
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Scale in animation */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Select pulse animation */
+@keyframes selectPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1.05);
+  }
+}
+
+/* Match pulse animation */
+@keyframes matchPulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Shake animation for errors */
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-8px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(8px);
+  }
+}
+
+/* Fade replace animation */
+@keyframes fadeReplace {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Floating score animation */
+@keyframes floatUp {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-80px) scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* ===================================
+   Floating Score Display
+   =================================== */
+
+.floatingScore {
+  position: absolute;
+  font-size: 1.5rem; /* text-2xl */
+  font-weight: 700;
+  color: #16a34a; /* green-600 */
+  pointer-events: none;
+  z-index: 999;
+  animation: floatUp 1.5s ease-out forwards;
+}
+
+/* ===================================
+   Accessibility
+   =================================== */
+
+/* Focus styles for keyboard navigation */
+.card:focus-visible {
+  outline: 3px solid #667eea;
+  outline-offset: 3px;
+}
+
+.startButton:focus-visible,
+.replayButton:focus-visible {
+  outline: 3px solid white;
+  outline-offset: 3px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .card {
+    border-width: 4px;
+  }
+
+  .card.selected {
+    border-width: 5px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ===================================
+   Mobile Optimizations
+   =================================== */
+
+@media (max-width: 480px) {
+  .gameContainer {
+    padding: 0.5rem;
+  }
+
+  .header {
+    padding: 0.75rem 1rem;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .overlayContent {
+    padding: 2rem 1.5rem;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .finalScore {
+    font-size: 2.5rem;
+  }
+
+  .card {
+    min-height: 80px;
+    padding: 1rem 0.5rem;
+  }
+
+  .cardEmoji .emoji {
+    font-size: 2.5rem;
+  }
+
+  .cardWord .word {
+    font-size: 1rem;
+  }
+}
+
+/* ===================================
+   Game Over Overlay (Dimmed on Game Board)
+   =================================== */
+
+.gameOverOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  border-radius: 0.75rem;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.gameOverContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 2rem;
+  text-align: center;
+  max-width: 90%;
+}
+
+.gameOverHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.partyEmoji {
+  font-size: 2rem;
+  animation: bounce 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes bounce {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-10px);
+  }
+}
+
+.gameOverTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ef4444; /* red-500 */
+  margin: 0;
+}
+
+.gameOverMessage {
+  font-size: 1.125rem;
+  color: #374151; /* gray-700 */
+  margin: 0;
+  line-height: 1.75;
+}
+
+.matchedText {
+  color: #2563eb; /* blue-600 */
+  font-weight: 700;
+}
+
+.finalScoreText {
+  display: block;
+  margin-top: 0.5rem;
+  color: #374151; /* gray-700 */
+}
+
+.playAgainButton {
+  background: #22c55e; /* green-500 */
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  font-family: inherit;
+}
+
+.playAgainButton:hover {
+  background: #16a34a; /* green-600 */
+  transform: scale(1.05);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.playAgainButton:active {
+  transform: scale(0.95);
+}
+
+/* ===================================
+   Print Styles (hide interactive elements)
+   =================================== */
+
+@media print {
+  .overlay,
+  .header,
+  .floatingScore,
+  .gameOverOverlay {
+    display: none;
+  }
+}
