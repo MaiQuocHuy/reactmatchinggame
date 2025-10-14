@@ -1,11 +1,11 @@
 import styles from "./MatchingGame.module.css";
 
 /**
- * Header Component
- * Displays the game score and timer
- * @param {Object} props - Component props
+ * Header component for the matching game
+ * @param {Object} props
  * @param {number} props.score - Current game score
  * @param {number} props.timer - Remaining time in seconds
+ * @returns {JSX.Element}
  */
 export default function Header({ score, timer }) {
   return (

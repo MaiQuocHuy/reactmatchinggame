@@ -2,14 +2,14 @@ import Card from "./Card";
 import styles from "./MatchingGame.module.css";
 
 /**
- * GameBoard Component
- * Renders the two grids of cards (images and words)
- * @param {Object} props - Component props
+ * GameBoard component for the matching game
+ * @param {Object} props
  * @param {Array} props.imageCards - Array of image card objects
  * @param {Array} props.wordCards - Array of word card objects
- * @param {Object} props.selected - Currently selected cards {imageId, wordId}
- * @param {Function} props.onCardClick - Card click handler
- * @param {boolean} props.disabled - Whether cards are disabled
+ * @param {Object} props.selected - Currently selected card IDs
+ * @param {Function} props.onCardClick - Callback function for card click events
+ * @param {boolean} props.disabled - Whether the board is disabled (e.g., during animations)
+ * @returns {JSX.Element}
  */
 export default function GameBoard({
   imageCards,

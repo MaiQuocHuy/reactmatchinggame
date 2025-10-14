@@ -1,16 +1,16 @@
 import styles from "./MatchingGame.module.css";
 
 /**
- * GameOverlay Component
- * Displays start screen or game over screen
- * @param {Object} props - Component props
- * @param {string} props.type - Type of overlay: 'start' or 'end'
- * @param {string} props.title - Game title to display on start screen
+ * GameOverlay component for the matching game
+ * @param {Object} props
+ * @param {string} props.type - Overlay type ("start" | "end")
+ * @param {string} props.title - Overlay title
  * @param {number} props.score - Final score (for end screen)
  * @param {number} props.maxScore - Maximum possible score (for end screen)
  * @param {number} props.matchedPairs - Number of matched pairs (for end screen)
  * @param {boolean} props.isWin - Whether the player won (completed all matches) or lost (time ran out)
  * @param {Function} props.onStart - Callback when start button clicked
+ * @returns {JSX.Element}
  */
 export default function GameOverlay({
   type,

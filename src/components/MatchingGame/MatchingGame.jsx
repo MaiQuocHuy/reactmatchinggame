@@ -47,15 +47,12 @@ try {
 
 /**
  * MatchingGame Component
- *
- * A fully-featured matching game with image-word pairs.
- * Features: timer, score calculation, sound effects, animations, accessibility
- *
  * @param {Object} props - Component props
  * @param {Array} props.data - Array of items with {id, image, word} structure (default: masterItems from data.js)
  * @param {number} props.initialPairs - Number of image-word pairs to display (default: 5)
  * @param {number} props.timerLength - Game timer duration in seconds (default: 60)
  * @param {string} props.title - Game title to display (default: "Picture Match Fun!")
+ * @returns {JSX.Element}
  */
 export default function MatchingGame({
   data = masterItems,

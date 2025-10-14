@@ -1,20 +1,12 @@
 import styles from "./MatchingGame.module.css";
-
 /**
- * Card Component
- * Renders a single card (image or word)
+ * Card component for the matching game
  * @param {Object} props - Component props
- * @param {Object} props.card - Card data
- * @param {number} props.card.id - Unique card ID
- * @param {string} props.card.type - 'image' or 'word'
- * @param {string} props.card.content - Card content (word for text, or word for alt text on images)
- * @param {string} props.card.image - Image URL (for image cards)
- * @param {boolean} props.card.matched - Whether card is matched
- * @param {boolean} props.card.error - Whether card is in error state
- * @param {boolean} props.card.replacing - Whether card is being replaced
- * @param {boolean} props.isSelected - Whether card is currently selected
- * @param {Function} props.onClick - Click handler
- * @param {boolean} props.disabled - Whether card is disabled
+ * @param {Object} props.card - Card object with {id, type, content, image, matched, error, replacing}
+ * @param {boolean} props.isSelected - Whether the card is currently selected
+ * @param {Function} props.onClick - Click handler for the card
+ * @param {boolean} props.disabled - Whether the card is disabled
+ * @returns {JSX.Element}
  */
 export default function Card({ card, isSelected, onClick, disabled }) {
   const cardClasses = [
