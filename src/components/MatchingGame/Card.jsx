@@ -2,12 +2,13 @@ import styles from "./MatchingGame.module.css";
 
 /**
  * Card Component
- * Renders a single card (emoji or word)
+ * Renders a single card (image or word)
  * @param {Object} props - Component props
  * @param {Object} props.card - Card data
  * @param {number} props.card.id - Unique card ID
- * @param {string} props.card.type - 'emoji' or 'word'
- * @param {string} props.card.content - Card content to display
+ * @param {string} props.card.type - 'image' or 'word'
+ * @param {string} props.card.content - Card content (word for text, or word for alt text on images)
+ * @param {string} props.card.image - Image URL (for image cards)
  * @param {boolean} props.card.matched - Whether card is matched
  * @param {boolean} props.card.error - Whether card is in error state
  * @param {boolean} props.card.replacing - Whether card is being replaced
@@ -18,7 +19,7 @@ import styles from "./MatchingGame.module.css";
 export default function Card({ card, isSelected, onClick, disabled }) {
   const cardClasses = [
     styles.card,
-    card.type === "emoji" ? styles.cardEmoji : styles.cardWord,
+    card.type === "image" ? styles.cardImage : styles.cardWord,
     isSelected && styles.selected,
     card.matched && styles.matched,
     card.error && styles.error,
@@ -36,10 +37,13 @@ export default function Card({ card, isSelected, onClick, disabled }) {
       aria-pressed={isSelected}
       aria-label={`${card.type} card: ${card.content}`}
     >
-      {card.type === "emoji" ? (
-        <span className={styles.emoji} aria-hidden="true">
-          {card.content}
-        </span>
+      {card.type === "image" ? (
+        <img
+          src={card.image}
+          alt={card.content}
+          className={styles.cardImageElement}
+          aria-hidden="true"
+        />
       ) : (
         <span className={styles.word}>{card.content}</span>
       )}

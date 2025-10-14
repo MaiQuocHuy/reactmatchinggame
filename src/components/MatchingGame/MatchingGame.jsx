@@ -5,6 +5,7 @@ import Header from "./Header";
 import GameOverlay from "./GameOverlay";
 import GameBoard from "./GameBoard";
 import styles from "./MatchingGame.module.css";
+import { shuffleArray } from "../../helpers/shuffle";
 
 // Import sound files - supports both .mp3 and .wav formats
 // Sound files are located in src/assets/sounds/
@@ -47,25 +48,33 @@ try {
 /**
  * MatchingGame Component
  *
- * A fully-featured matching game with emoji-word pairs.
+ * A fully-featured matching game with image-word pairs.
  * Features: timer, score calculation, sound effects, animations, accessibility
  *
  * @param {Object} props - Component props
- * @param {number} props.initialPairs - Number of emoji-word pairs to display (default: 5)
+ * @param {Array} props.data - Array of items with {id, image, word} structure (default: masterItems from data.js)
+ * @param {number} props.initialPairs - Number of image-word pairs to display (default: 5)
  * @param {number} props.timerLength - Game timer duration in seconds (default: 60)
+ * @param {string} props.title - Game title to display (default: "Picture Match Fun!")
  */
-export default function MatchingGame({ initialPairs = 5, timerLength = 60 }) {
+export default function MatchingGame({
+  data = masterItems,
+  initialPairs = 5,
+  timerLength = 60,
+  title = "Picture Match Fun!",
+}) {
   // State management
   const [deck, setDeck] = useState([]);
-  const [emojiCards, setEmojiCards] = useState([]);
+  const [imageCards, setImageCards] = useState([]);
   const [wordCards, setWordCards] = useState([]);
   const [score, setScore] = useState(0);
   const [timer, setTimer] = useState(timerLength);
   const [gameState, setGameState] = useState("idle"); // 'idle' | 'playing' | 'verifying' | 'finished'
   const [selected, setSelected] = useState({});
   const [floatingScores, setFloatingScores] = useState([]);
-  const [notification, setNotification] = useState(null); // {type: 'success' | 'error', message: string}
   const [matchedPairsCount, setMatchedPairsCount] = useState(0); // Track number of matched pairs
+  const [isWin, setIsWin] = useState(false); // Track if player won (completed all matches)
+  const [usedItemIds, setUsedItemIds] = useState([]); // Track IDs of items that have been matched
 
   // Refs
   const timerIntervalRef = useRef(null);
@@ -85,33 +94,24 @@ export default function MatchingGame({ initialPairs = 5, timerLength = 60 }) {
     soundEnabled: soundEnabledRef.current,
   });
 
-  // Shuffle helper function
-  const shuffleArray = (array) => {
-    const shuffled = [...array];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    return shuffled;
-  };
-
   // Initialize game
   const initializeGame = useCallback(() => {
     // Enable sound on user gesture
     soundEnabledRef.current = true;
 
     // Select random items
-    const shuffledMaster = shuffleArray(masterItems);
+    const shuffledMaster = shuffleArray(data);
     const selectedItems = shuffledMaster.slice(0, initialPairs);
     setDeck(selectedItems);
 
-    // Create emoji cards (shuffled)
-    const shuffledEmojis = shuffleArray(
+    // Create image cards (shuffled)
+    const shuffledImages = shuffleArray(
       selectedItems.map((item, idx) => ({
         id: idx,
         originalId: item.id,
-        type: "emoji",
-        content: item.emoji,
+        type: "image",
+        content: item.word,
+        image: item.image,
         matched: false,
         error: false,
         replacing: false,
@@ -131,13 +131,15 @@ export default function MatchingGame({ initialPairs = 5, timerLength = 60 }) {
       }))
     );
 
-    setEmojiCards(shuffledEmojis);
+    setImageCards(shuffledImages);
     setWordCards(shuffledWords);
     setScore(0);
     setTimer(timerLength);
     setSelected({});
     setFloatingScores([]);
     setMatchedPairsCount(0);
+    setIsWin(false);
+    setUsedItemIds(selectedItems.map((item) => item.id)); // Track initial items as used
     setGameState("playing");
 
     // Start timer
@@ -151,13 +153,14 @@ export default function MatchingGame({ initialPairs = 5, timerLength = 60 }) {
           if (timerIntervalRef.current) {
             clearInterval(timerIntervalRef.current);
           }
+          setIsWin(false); // Time ran out - player lost
           setGameState("finished");
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
-  }, [initialPairs, timerLength]);
+  }, [data, initialPairs, timerLength]);
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -168,14 +171,37 @@ export default function MatchingGame({ initialPairs = 5, timerLength = 60 }) {
     };
   }, []);
 
+  // Check for win condition whenever state changes
+  useEffect(() => {
+    if (gameState !== "playing") return;
+
+    // Check if all items have been used and all cards are matched
+    const allItemsUsed = usedItemIds.length >= data.length;
+    const allCardsMatched =
+      imageCards.length > 0 &&
+      imageCards.every((c) => c.matched) &&
+      wordCards.every((c) => c.matched);
+
+    if (allItemsUsed && allCardsMatched) {
+      // All items matched - player wins!
+      setTimeout(() => {
+        if (timerIntervalRef.current) {
+          clearInterval(timerIntervalRef.current);
+        }
+        setIsWin(true);
+        setGameState("finished");
+      }, 600);
+    }
+  }, [usedItemIds, imageCards, wordCards, gameState, data.length]);
+
   // Handle card selection
   const handleCardClick = (cardId, type) => {
     if (gameState !== "playing" && gameState !== "verifying") return;
     if (gameState === "verifying") return;
 
     const card =
-      type === "emoji"
-        ? emojiCards.find((c) => c.id === cardId)
+      type === "image"
+        ? imageCards.find((c) => c.id === cardId)
         : wordCards.find((c) => c.id === cardId);
 
     if (!card || card.matched) return;
@@ -185,8 +211,8 @@ export default function MatchingGame({ initialPairs = 5, timerLength = 60 }) {
       playSelect();
     }
 
-    if (type === "emoji") {
-      // Toggle emoji selection
+    if (type === "image") {
+      // Toggle image selection
       if (selected.imageId === cardId) {
         setSelected({ ...selected, imageId: undefined });
       } else {
@@ -202,7 +228,7 @@ export default function MatchingGame({ initialPairs = 5, timerLength = 60 }) {
         setSelected({ ...selected, wordId: undefined });
       } else {
         setSelected({ ...selected, wordId: cardId });
-        // Check for match if emoji is also selected
+        // Check for match if image is also selected
         if (selected.imageId !== undefined) {
           checkMatch(selected.imageId, cardId);
         }
@@ -211,29 +237,27 @@ export default function MatchingGame({ initialPairs = 5, timerLength = 60 }) {
   };
 
   // Check if selected cards match
-  const checkMatch = (emojiId, wordId) => {
+  const checkMatch = (imageId, wordId) => {
     setGameState("verifying");
 
-    const emojiCard = emojiCards.find((c) => c.id === emojiId);
+    const imageCard = imageCards.find((c) => c.id === imageId);
     const wordCard = wordCards.find((c) => c.id === wordId);
 
-    if (!emojiCard || !wordCard) {
+    if (!imageCard || !wordCard) {
       setGameState("playing");
       return;
     }
 
-    const isMatch = emojiCard.originalId === wordCard.originalId;
+    const isMatch = imageCard.originalId === wordCard.originalId;
 
     if (isMatch) {
       // Correct match!
-      const matchScore = 50 + Math.floor(timer / 2);
+      // const matchScore = 50 + Math.floor(timer / 2);
+      const matchScore = 50;
       setScore((prev) => prev + matchScore);
 
       // Increment matched pairs count
       setMatchedPairsCount((prev) => prev + 1);
-
-      // Show success notification
-      setNotification({ type: "success", message: "Correct!" });
 
       // Play match sound
       if (matchSfx) {
@@ -258,8 +282,8 @@ export default function MatchingGame({ initialPairs = 5, timerLength = 60 }) {
       }, 1500);
 
       // Immediately mark as matched
-      setEmojiCards((prev) =>
-        prev.map((c) => (c.id === emojiId ? { ...c, matched: true } : c))
+      setImageCards((prev) =>
+        prev.map((c) => (c.id === imageId ? { ...c, matched: true } : c))
       );
       setWordCards((prev) =>
         prev.map((c) => (c.id === wordId ? { ...c, matched: true } : c))
@@ -268,56 +292,40 @@ export default function MatchingGame({ initialPairs = 5, timerLength = 60 }) {
       // Clear selection
       setSelected({});
 
-      // Check if game is complete
-      const allMatched =
-        emojiCards.every((c) => c.id === emojiId || c.matched) &&
-        wordCards.every((c) => c.id === wordId || c.matched);
+      // Replace matched cards after brief animation and shuffle positions within columns
+      setTimeout(() => {
+        replaceMatchedPair(imageCard.originalId);
 
-      if (allMatched) {
-        setTimeout(() => {
-          if (timerIntervalRef.current) {
-            clearInterval(timerIntervalRef.current);
+        // Shuffle positions within each column
+        setImageCards((prev) => {
+          const shuffled = [...prev];
+          for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
           }
-          setGameState("finished");
-        }, 600);
-      } else {
-        // Replace matched cards after brief animation and shuffle positions within columns
-        setTimeout(() => {
-          replaceMatchedPair(emojiCard.originalId);
-          // Shuffle positions within each column
-          setEmojiCards((prev) => {
-            const shuffled = [...prev];
-            for (let i = shuffled.length - 1; i > 0; i--) {
-              const j = Math.floor(Math.random() * (i + 1));
-              [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-            }
-            return shuffled;
-          });
-          setWordCards((prev) => {
-            const shuffled = [...prev];
-            for (let i = shuffled.length - 1; i > 0; i--) {
-              const j = Math.floor(Math.random() * (i + 1));
-              [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-            }
-            return shuffled;
-          });
-        }, 250);
-      }
+          return shuffled;
+        });
+        setWordCards((prev) => {
+          const shuffled = [...prev];
+          for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+          }
+          return shuffled;
+        });
+      }, 250);
 
       // Return to playing state immediately
       setTimeout(() => setGameState("playing"), 300);
     } else {
       // Incorrect match
-      // Show error notification
-      setNotification({ type: "error", message: "Try again!" });
-
       if (errorSfx) {
         playError();
       }
 
       // Show error animation
-      setEmojiCards((prev) =>
-        prev.map((c) => (c.id === emojiId ? { ...c, error: true } : c))
+      setImageCards((prev) =>
+        prev.map((c) => (c.id === imageId ? { ...c, error: true } : c))
       );
       setWordCards((prev) =>
         prev.map((c) => (c.id === wordId ? { ...c, error: true } : c))
@@ -325,8 +333,8 @@ export default function MatchingGame({ initialPairs = 5, timerLength = 60 }) {
 
       // Remove error state and selection after showing error
       setTimeout(() => {
-        setEmojiCards((prev) =>
-          prev.map((c) => (c.id === emojiId ? { ...c, error: false } : c))
+        setImageCards((prev) =>
+          prev.map((c) => (c.id === imageId ? { ...c, error: false } : c))
         );
         setWordCards((prev) =>
           prev.map((c) => (c.id === wordId ? { ...c, error: false } : c))
@@ -339,20 +347,24 @@ export default function MatchingGame({ initialPairs = 5, timerLength = 60 }) {
 
   // Replace matched pair with new items
   const replaceMatchedPair = (matchedOriginalId) => {
-    // Find new items not in current deck
-    const currentIds = deck.map((item) => item.id);
-    const availableItems = masterItems.filter(
-      (item) => !currentIds.includes(item.id)
+    // Find new items that haven't been used yet
+    const availableItems = data.filter(
+      (item) => !usedItemIds.includes(item.id)
     );
 
     if (availableItems.length === 0) {
       // No more items to replace with
+      // Don't replace the cards, just leave them matched
+      // The game will end when the player matches all remaining pairs on screen
       return;
     }
 
     // Pick a random new item
     const newItem =
       availableItems[Math.floor(Math.random() * availableItems.length)];
+
+    // Mark this item as used
+    setUsedItemIds((prev) => [...prev, newItem.id]);
 
     // Add to deck
     setDeck((prev) => [
@@ -361,16 +373,17 @@ export default function MatchingGame({ initialPairs = 5, timerLength = 60 }) {
     ]);
 
     // Create new cards
-    const newEmojiId =
-      Math.max(...emojiCards.map((c) => c.id), ...wordCards.map((c) => c.id)) +
+    const newImageId =
+      Math.max(...imageCards.map((c) => c.id), ...wordCards.map((c) => c.id)) +
       1;
-    const newWordId = newEmojiId + 1;
+    const newWordId = newImageId + 1;
 
-    const newEmojiCard = {
-      id: newEmojiId,
+    const newImageCard = {
+      id: newImageId,
       originalId: newItem.id,
-      type: "emoji",
-      content: newItem.emoji,
+      type: "image",
+      content: newItem.word,
+      image: newItem.image,
       matched: false,
       error: false,
       replacing: true,
@@ -387,8 +400,8 @@ export default function MatchingGame({ initialPairs = 5, timerLength = 60 }) {
     };
 
     // Replace cards
-    setEmojiCards((prev) =>
-      prev.map((c) => (c.originalId === matchedOriginalId ? newEmojiCard : c))
+    setImageCards((prev) =>
+      prev.map((c) => (c.originalId === matchedOriginalId ? newImageCard : c))
     );
     setWordCards((prev) =>
       prev.map((c) => (c.originalId === matchedOriginalId ? newWordCard : c))
@@ -396,8 +409,8 @@ export default function MatchingGame({ initialPairs = 5, timerLength = 60 }) {
 
     // Remove replacing state after animation
     setTimeout(() => {
-      setEmojiCards((prev) =>
-        prev.map((c) => (c.id === newEmojiId ? { ...c, replacing: false } : c))
+      setImageCards((prev) =>
+        prev.map((c) => (c.id === newImageId ? { ...c, replacing: false } : c))
       );
       setWordCards((prev) =>
         prev.map((c) => (c.id === newWordId ? { ...c, replacing: false } : c))
@@ -409,7 +422,7 @@ export default function MatchingGame({ initialPairs = 5, timerLength = 60 }) {
     <div className={styles.gameContainer}>
       {/* White modal card containing game content */}
       {gameState === "idle" && (
-        <GameOverlay type="start" onStart={initializeGame} />
+        <GameOverlay type="start" title={title} onStart={initializeGame} />
       )}
 
       {gameState !== "idle" && (
@@ -421,7 +434,7 @@ export default function MatchingGame({ initialPairs = 5, timerLength = 60 }) {
                 textAlign: "center",
               }}
             >
-              Picture Match Fun!
+              {title}
             </h1>
 
             {/* Game Header - always visible */}
@@ -434,14 +447,16 @@ export default function MatchingGame({ initialPairs = 5, timerLength = 60 }) {
                 <GameOverlay
                   type="end"
                   score={score}
+                  maxScore={data.length * 50}
                   matchedPairs={matchedPairsCount}
+                  isWin={isWin}
                   onStart={initializeGame}
                 />
               )}
 
               {/* Game Board - always visible to show behind overlay */}
               <GameBoard
-                emojiCards={emojiCards}
+                imageCards={imageCards}
                 wordCards={wordCards}
                 selected={selected}
                 onCardClick={handleCardClick}

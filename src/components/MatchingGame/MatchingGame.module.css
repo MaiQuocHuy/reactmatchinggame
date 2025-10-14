@@ -336,11 +336,39 @@
   opacity: 0.6;
 }
 
-/* Emoji cards */
-.cardEmoji .emoji {
-  font-size: 3rem;
-  line-height: 1;
+/* Image cards */
+/* Legacy text emoji styles removed - now using SVG/image files */
+
+/* Image card container styles */
+.cardImage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Image element inside card */
+.cardImageElement {
+  width: 100%;
+  height: 100%;
+  max-width: 80px;
+  max-height: 80px;
+  object-fit: contain;
   user-select: none;
+  pointer-events: none;
+}
+
+@media (min-width: 640px) {
+  .cardImageElement {
+    max-width: 100px;
+    max-height: 100px;
+  }
+}
+
+@media (min-width: 768px) {
+  .cardImageElement {
+    max-width: 120px;
+    max-height: 120px;
+  }
 }
 
 /* Word cards */
@@ -581,10 +609,6 @@
     padding: 1rem 0.5rem;
   }
 
-  .cardEmoji .emoji {
-    font-size: 2.5rem;
-  }
-
   .cardWord .word {
     font-size: 1rem;
   }
@@ -628,25 +652,17 @@
   gap: 1rem;
 }
 
-.partyEmoji {
-  font-size: 2rem;
-  animation: bounce 0.6s ease-in-out infinite alternate;
-}
-
-@keyframes bounce {
-  0% {
-    transform: translateY(0);
-  }
-  100% {
-    transform: translateY(-10px);
-  }
-}
+/* Party animation styles removed - no longer using text emojis */
 
 .gameOverTitle {
   font-size: 2rem;
   font-weight: 700;
-  color: #ef4444; /* red-500 */
+  color: #ef4444; /* red-500 - for time's up */
   margin: 0;
+}
+
+.gameOverTitle.win {
+  color: #22c55e; /* green-500 - for win */
 }
 
 .gameOverMessage {
@@ -689,6 +705,125 @@
 
 .playAgainButton:active {
   transform: scale(0.95);
+}
+
+/* Stats Container */
+.statsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 400px;
+}
+
+.matchedStats {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: rgba(59, 130, 246, 0.1); /* blue-500 with opacity */
+  border-radius: 0.75rem;
+  border: 2px solid #3b82f6; /* blue-500 */
+}
+
+.matchedLabel {
+  font-size: 0.875rem;
+  color: #1e40af; /* blue-800 */
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.matchedValue {
+  font-size: 2rem;
+  color: #2563eb; /* blue-600 */
+  font-weight: 700;
+}
+
+.scoreStats {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  background: linear-gradient(
+    135deg,
+    rgba(34, 197, 94, 0.1) 0%,
+    rgba(59, 130, 246, 0.1) 100%
+  );
+  border-radius: 0.75rem;
+  border: 2px solid #22c55e; /* green-500 */
+}
+
+.scoreLabel {
+  font-size: 0.875rem;
+  color: #15803d; /* green-800 */
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.scoreComparison {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-weight: 700;
+}
+
+.userScore {
+  font-size: 3rem;
+  color: #22c55e; /* green-500 */
+  line-height: 1;
+}
+
+.scoreDivider {
+  font-size: 2rem;
+  color: #6b7280; /* gray-500 */
+  font-weight: 400;
+}
+
+.maxScore {
+  font-size: 2rem;
+  color: #6b7280; /* gray-500 */
+  line-height: 1;
+}
+
+.scorePercentage {
+  font-size: 1rem;
+  color: #059669; /* green-600 */
+  font-weight: 600;
+  padding: 0.375rem 1rem;
+  background: rgba(34, 197, 94, 0.2);
+  border-radius: 9999px;
+}
+
+/* Responsive Styles for Stats */
+@media (max-width: 640px) {
+  .statsContainer {
+    gap: 1rem;
+    max-width: 100%;
+  }
+
+  .userScore {
+    font-size: 2.5rem;
+  }
+
+  .scoreDivider {
+    font-size: 1.5rem;
+  }
+
+  .maxScore {
+    font-size: 1.5rem;
+  }
+
+  .matchedValue {
+    font-size: 1.75rem;
+  }
+
+  .scorePercentage {
+    font-size: 0.875rem;
+  }
 }
 
 /* ===================================

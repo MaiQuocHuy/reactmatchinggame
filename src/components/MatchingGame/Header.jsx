@@ -11,15 +11,6 @@ export default function Header({ score, timer }) {
   return (
     <header className={styles.header}>
       <div
-        className={styles.scoreDisplay}
-        role="status"
-        aria-live="polite"
-        aria-label={`Score: ${score}`}
-      >
-        <span className={styles.label}>Score:</span>
-        <span className={styles.value}>{score}</span>
-      </div>
-      <div
         className={styles.timerDisplay}
         role="timer"
         aria-live="polite"
@@ -27,6 +18,15 @@ export default function Header({ score, timer }) {
       >
         <span className={styles.label}>⏱️ Time:</span>
         <span className={styles.value}>{timer}s</span>
+      </div>
+      <div
+        className={styles.scoreDisplay}
+        role="status"
+        aria-live="polite"
+        aria-label={`Score: ${score}`}
+      >
+        <span className={styles.label}>Score:</span>
+        <span className={styles.value}>{score}</span>
       </div>
     </header>
   );
