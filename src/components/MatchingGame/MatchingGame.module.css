@@ -1009,28 +1009,29 @@
   .startGame,
   .endGame {
     max-width: 800px; /* slightly larger on big screens */
+    gap: 1rem; /* increase gap between header and game board */
   }
 
   .gameBoard {
-    gap: 2rem; /* more comfortable spacing */
+    gap: 1.5rem; /* keep same as 1024px - don't increase */
   }
 
   .gridImages,
   .gridWords {
-    gap: 1.25rem;
+    gap: 1rem; /* keep same as 1024px - don't increase */
   }
 
   .card {
-    padding: 1.25rem;
+    padding: 1rem; /* keep same as 1024px - don't increase */
   }
 
   .cardImageElement {
-    max-width: 70px;
-    max-height: 70px;
+    max-width: 60px; /* keep same as 1024px - don't increase */
+    max-height: 60px;
   }
 
   .cardWord .word {
-    font-size: 1.125rem;
+    font-size: 1rem; /* keep same as 1024px - don't increase */
   }
 }
 
