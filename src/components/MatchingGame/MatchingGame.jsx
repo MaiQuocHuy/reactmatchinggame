@@ -112,6 +112,7 @@ export default function MatchingGame({
         matched: false,
         error: false,
         replacing: false,
+        entering: false,
       }))
     );
 
@@ -125,6 +126,7 @@ export default function MatchingGame({
         matched: false,
         error: false,
         replacing: false,
+        entering: false,
       }))
     );
 
@@ -289,28 +291,25 @@ export default function MatchingGame({
       // Clear selection
       setSelected({});
 
-      // Replace matched cards after brief animation and shuffle positions within columns
+      // Replace matched cards after brief animation
       setTimeout(() => {
         replaceMatchedPair(imageCard.originalId);
-
-        // Shuffle positions within each column
-        setImageCards((prev) => {
-          const shuffled = [...prev];
-          for (let i = shuffled.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-          }
-          return shuffled;
-        });
-        setWordCards((prev) => {
-          const shuffled = [...prev];
-          for (let i = shuffled.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-          }
-          return shuffled;
-        });
       }, 250);
+
+      // Shuffle positions AFTER replace animation completes (non-blocking)
+      setTimeout(() => {
+        requestAnimationFrame(() => {
+          // Shuffle positions within each column
+          setImageCards((prev) => {
+            const shuffled = shuffleArray(prev);
+            return shuffled;
+          });
+          setWordCards((prev) => {
+            const shuffled = shuffleArray(prev);
+            return shuffled;
+          });
+        });
+      }, 550); // Wait for replace animation to complete (250ms + 300ms animation)
 
       // Return to playing state immediately
       setTimeout(() => setGameState("playing"), 300);
@@ -343,77 +342,127 @@ export default function MatchingGame({
   };
 
   // Replace matched pair with new items
-  const replaceMatchedPair = (matchedOriginalId) => {
-    // Find new items that haven't been used yet
-    const availableItems = data.filter(
-      (item) => !usedItemIds.includes(item.id)
-    );
-
-    if (availableItems.length === 0) {
-      // No more items to replace with
-      // Don't replace the cards, just leave them matched
-      // The game will end when the player matches all remaining pairs on screen
-      return;
-    }
-
-    // Pick a random new item
-    const newItem =
-      availableItems[Math.floor(Math.random() * availableItems.length)];
-
-    // Mark this item as used
-    setUsedItemIds((prev) => [...prev, newItem.id]);
-
-    // Add to deck
-    setDeck((prev) => [
-      ...prev.filter((item) => item.id !== matchedOriginalId),
-      newItem,
-    ]);
-
-    // Create new cards
-    const newImageId =
-      Math.max(...imageCards.map((c) => c.id), ...wordCards.map((c) => c.id)) +
-      1;
-    const newWordId = newImageId + 1;
-
-    const newImageCard = {
-      id: newImageId,
-      originalId: newItem.id,
-      type: "image",
-      content: newItem.word,
-      image: newItem.image,
-      matched: false,
-      error: false,
-      replacing: true,
-    };
-
-    const newWordCard = {
-      id: newWordId,
-      originalId: newItem.id,
-      type: "word",
-      content: newItem.word,
-      matched: false,
-      error: false,
-      replacing: true,
-    };
-
-    // Replace cards
-    setImageCards((prev) =>
-      prev.map((c) => (c.originalId === matchedOriginalId ? newImageCard : c))
-    );
-    setWordCards((prev) =>
-      prev.map((c) => (c.originalId === matchedOriginalId ? newWordCard : c))
-    );
-
-    // Remove replacing state after animation
-    setTimeout(() => {
-      setImageCards((prev) =>
-        prev.map((c) => (c.id === newImageId ? { ...c, replacing: false } : c))
+  const replaceMatchedPair = useCallback(
+    (matchedOriginalId) => {
+      // Find new items that haven't been used yet
+      const availableItems = data.filter(
+        (item) => !usedItemIds.includes(item.id)
       );
-      setWordCards((prev) =>
-        prev.map((c) => (c.id === newWordId ? { ...c, replacing: false } : c))
-      );
-    }, 500);
-  };
+
+      if (availableItems.length === 0) {
+        // No more items to replace with
+        return;
+      }
+
+      // Pick a random new item
+      const newItem =
+        availableItems[Math.floor(Math.random() * availableItems.length)];
+
+      // Mark this item as used
+      setUsedItemIds((prev) => [...prev, newItem.id]);
+
+      // Add to deck (optimized - avoid filter)
+      setDeck((prev) => {
+        const filtered = prev.filter((item) => item.id !== matchedOriginalId);
+        filtered.push(newItem);
+        return filtered;
+      });
+
+      // Create new cards with simple ID generation
+      const timestamp = Date.now();
+      const newImageId = timestamp;
+      const newWordId = timestamp + 1;
+
+      const newImageCard = {
+        id: newImageId,
+        originalId: newItem.id,
+        type: "image",
+        content: newItem.word,
+        image: newItem.image,
+        matched: false,
+        error: false,
+        replacing: true,
+        entering: false,
+      };
+
+      const newWordCard = {
+        id: newWordId,
+        originalId: newItem.id,
+        type: "word",
+        content: newItem.word,
+        matched: false,
+        error: false,
+        replacing: true,
+        entering: false,
+      };
+
+      // Replace cards (single operation per setState)
+      setImageCards((prev) => {
+        const index = prev.findIndex((c) => c.originalId === matchedOriginalId);
+        if (index === -1) return prev;
+        const newCards = [...prev];
+        newCards[index] = newImageCard;
+        return newCards;
+      });
+
+      setWordCards((prev) => {
+        const index = prev.findIndex((c) => c.originalId === matchedOriginalId);
+        if (index === -1) return prev;
+        const newCards = [...prev];
+        newCards[index] = newWordCard;
+        return newCards;
+      });
+
+      // Remove replacing state and add entering animation after old card fades out
+      setTimeout(() => {
+        requestAnimationFrame(() => {
+          setImageCards((prev) => {
+            const index = prev.findIndex((c) => c.id === newImageId);
+            if (index === -1) return prev;
+            const newCards = [...prev];
+            newCards[index] = {
+              ...newCards[index],
+              replacing: false,
+              entering: true,
+            };
+            return newCards;
+          });
+          setWordCards((prev) => {
+            const index = prev.findIndex((c) => c.id === newWordId);
+            if (index === -1) return prev;
+            const newCards = [...prev];
+            newCards[index] = {
+              ...newCards[index],
+              replacing: false,
+              entering: true,
+            };
+            return newCards;
+          });
+        });
+
+        // Remove entering class after animation completes
+        setTimeout(() => {
+          requestAnimationFrame(() => {
+            setImageCards((prev) => {
+              const index = prev.findIndex((c) => c.id === newImageId);
+              if (index === -1) return prev;
+              const newCards = [...prev];
+              newCards[index] = { ...newCards[index], entering: false };
+              return newCards;
+            });
+            setWordCards((prev) => {
+              const index = prev.findIndex((c) => c.id === newWordId);
+              if (index === -1) return prev;
+              const newCards = [...prev];
+              newCards[index] = { ...newCards[index], entering: false };
+              return newCards;
+            });
+          });
+        }, 500); // Match animation duration
+      }, 300);
+    },
+    [data, usedItemIds]
+  );
 
   return (
     <div className={styles.gameContainer}>

@@ -1,3 +1,4 @@
+import { memo, useCallback } from "react";
 import Card from "./Card";
 import styles from "./MatchingGame.module.css";
 
@@ -11,13 +12,7 @@ import styles from "./MatchingGame.module.css";
  * @param {boolean} props.disabled - Whether the board is disabled (e.g., during animations)
  * @returns {JSX.Element}
  */
-export default function GameBoard({
-  imageCards,
-  wordCards,
-  selected,
-  onCardClick,
-  disabled,
-}) {
+function GameBoard({ imageCards, wordCards, selected, onCardClick, disabled }) {
   return (
     <main className={styles.gameBoard}>
       {/* Image Grid */}
@@ -48,3 +43,6 @@ export default function GameBoard({
     </main>
   );
 }
+
+// Memoize GameBoard to prevent re-renders when props haven't changed
+export default memo(GameBoard);

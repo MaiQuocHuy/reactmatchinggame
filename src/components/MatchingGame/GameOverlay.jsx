@@ -40,23 +40,39 @@ export default function GameOverlay({
     const scorePercentage =
       maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
 
+    // Assuming average of 5 seconds per match
+    const totalPairs = maxScore / 50; // Each pair = 50 points
+
+    // Determine result message
+    const resultMessage = isWin
+      ? "You Win!"
+      : matchedPairs === 0
+      ? "Failed - Try Again!"
+      : "Time's Up!";
+
+    const resultEmoji = isWin ? "🎉" : matchedPairs === 0 ? "😔" : "⏰";
+
     return (
       <div className={styles.gameOverOverlay}>
         <div className={styles.gameOverContent}>
           <div className={styles.gameOverHeader}>
-            <span className={styles.partyEmoji}>{isWin ? "🎉" : "🎊"}</span>
+            <span className={styles.partyEmoji}>{resultEmoji}</span>
             <h2
-              className={`${styles.gameOverTitle} ${isWin ? styles.win : ""}`}
+              className={`${styles.gameOverTitle} ${
+                isWin ? styles.win : styles.lose
+              }`}
             >
-              {isWin ? "You Win!" : "Time's Up!"}
+              {resultMessage}
             </h2>
-            <span className={styles.partyEmoji}>{isWin ? "🎉" : "🎊"}</span>
+            <span className={styles.partyEmoji}>{resultEmoji}</span>
           </div>
 
           <div className={styles.statsContainer}>
             <div className={styles.matchedStats}>
               <span className={styles.matchedLabel}>Matched Pairs</span>
-              <span className={styles.matchedValue}>{matchedPairs || 0}</span>
+              <span className={styles.matchedValue}>
+                {matchedPairs || 0} / {totalPairs}
+              </span>
             </div>
 
             <div className={styles.scoreStats}>
@@ -73,7 +89,7 @@ export default function GameOverlay({
           </div>
 
           <button className={styles.playAgainButton} onClick={onStart}>
-            Play Again
+            {isWin ? "Play Again" : "Try Again"}
           </button>
         </div>
       </div>
