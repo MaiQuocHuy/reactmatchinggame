@@ -1,14 +1,16 @@
+import { memo } from "react";
 import styles from "./MatchingGame.module.css";
+
 /**
  * Card component for the matching game
  * @param {Object} props - Component props
- * @param {Object} props.card - Card object with {id, type, content, image, matched, error, replacing}
+ * @param {Object} props.card - Card object with {id, type, content, image, matched, error, replacing, entering}
  * @param {boolean} props.isSelected - Whether the card is currently selected
  * @param {Function} props.onClick - Click handler for the card
  * @param {boolean} props.disabled - Whether the card is disabled
  * @returns {JSX.Element}
  */
-export default function Card({ card, isSelected, onClick, disabled }) {
+function Card({ card, isSelected, onClick, disabled }) {
   const cardClasses = [
     styles.card,
     card.type === "image" ? styles.cardImage : styles.cardWord,
@@ -16,6 +18,7 @@ export default function Card({ card, isSelected, onClick, disabled }) {
     card.matched && styles.matched,
     card.error && styles.error,
     card.replacing && styles.replacing,
+    card.entering && styles.entering,
   ]
     .filter(Boolean)
     .join(" ");
@@ -35,6 +38,8 @@ export default function Card({ card, isSelected, onClick, disabled }) {
           alt={card.content}
           className={styles.cardImageElement}
           aria-hidden="true"
+          loading="eager"
+          decoding="async"
         />
       ) : (
         <span className={styles.word}>{card.content}</span>
@@ -42,3 +47,7 @@ export default function Card({ card, isSelected, onClick, disabled }) {
     </button>
   );
 }
+
+// Memoize component to prevent unnecessary re-renders
+// Only re-render when props actually change
+export default memo(Card);
