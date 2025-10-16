@@ -12,7 +12,7 @@
    - Large:    1440px+
    =================================== */
 
-@import url("https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap");
+/* @import url("https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap"); */
 
 /* ===================================
    Container & Layout
@@ -137,7 +137,8 @@
 
 .replayButton,
 .startButton {
-  background: #22c55e; /* green-500 */
+  /* background: #22c55e; */
+  background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
   color: white;
   border: none;
   /* Mobile-first: bigger touch target */
@@ -145,11 +146,14 @@
   min-height: 48px; /* accessible touch target */
   min-width: 150px;
   font-size: 1.125rem; /* smaller on mobile */
-  font-weight: 600;
+  /* font-weight: 600; */
+  font-weight: bold;
   border-radius: 9999px; /* fully rounded */
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  /* box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); */
+  box-shadow: 0 8px 0 #e69100, 0 12px 20px rgba(0, 0, 0, 0.3);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
   position: absolute;
   bottom: -24px; /* reduced for mobile */
   left: 50%;
@@ -163,8 +167,9 @@
 @media (hover: hover) and (pointer: fine) {
   .replayButton:hover,
   .startButton:hover {
-    background: #16a34a; /* green-600 */
+    /* background: #16a34a; */
     transform: translateX(-50%) scale(1.05);
+    box-shadow: 0 10px 0 #e69100, 0 14px 25px rgba(0, 0, 0, 0.4);
   }
 }
 
@@ -172,7 +177,9 @@
 .replayButton:active,
 .startButton:active {
   transform: translateX(-50%) scale(0.95);
-  background: #15803d; /* darker green */
+  /* background: #15803d;  */
+  /* transform: translateY(0px); */
+  box-shadow: 0 0 0 #e69100, 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .gameOverTitle {
@@ -394,8 +401,8 @@
 
 .card.matched {
   background: #4ade80; /* green-400 */
-  transform: scale(0);
-  opacity: 0;
+  transform: scale(0.8);
+  /* opacity: 1; */
   transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
     opacity 0.45s ease-in-out, background-color 0.3s ease;
   pointer-events: none;
@@ -626,18 +633,21 @@
 }
 
 .playAgainButton {
-  background: #22c55e; /* green-500 */
+  /* background: #22c55e;  */
+  background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
   color: white;
   border: none;
   padding: 0.625rem 1.25rem; /* mobile: smaller */
   min-height: 44px; /* accessible touch target */
   min-width: 120px;
   font-size: 0.875rem; /* mobile: smaller */
-  font-weight: 700;
+  /* font-weight: 700; */
+  font-weight: bold;
   border-radius: 9999px;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 0 #e69100, 0 12px 20px rgba(0, 0, 0, 0.3);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
   font-family: inherit;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
@@ -645,15 +655,15 @@
 
 @media (hover: hover) and (pointer: fine) {
   .playAgainButton:hover {
-    background: #16a34a; /* green-600 */
+    /* background: #16a34a;  */
     transform: scale(1.05);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 0 #e69100, 0 14px 25px rgba(0, 0, 0, 0.4);
   }
 }
 
 .playAgainButton:active {
   transform: scale(0.95);
-  background: #15803d;
+  box-shadow: 0 0 0 #e69100, 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 /* Stats Container */
