@@ -290,15 +290,11 @@ export default function MatchingGame({
         playMatch();
       }
 
-      setUsedItemIds((prev) => {
-        if (!prev.find((item) => item.id === imageCard.originalId)) {
-          return [
-            ...prev,
-            { ...imageCard, id: imageCard.originalId, match: true },
-          ];
-        }
-        return prev;
-      });
+      setUsedItemIds((prev) =>
+        prev.map((item) =>
+          item.id === imageCard.originalId ? { ...item, match: true } : item
+        )
+      );
 
       // Create floating score animation
       const floatingId = `${Date.now()}-${Math.random()}`;
@@ -319,8 +315,9 @@ export default function MatchingGame({
 
       // Helper to update card state
       const updateCardState = (cardId, state) => {
-        const updateFn = (prev) =>
-          prev.map((c) => (c.id === cardId ? { ...c, ...state } : c));
+        const updateFn = (prev) => {
+          return prev.map((c) => (c.id === cardId ? { ...c, ...state } : c));
+        };
         return updateFn;
       };
 
@@ -333,18 +330,6 @@ export default function MatchingGame({
       setTimeout(() => {
         triggerReplaceAnimation(imageCard.originalId);
       }, 480);
-      // setTimeout(() => {
-      //   // Shuffle positions within each column
-      //   setImageCards((prev) => {
-      //     const shuffled = shuffleArray(prev);
-      //     return shuffled;
-      //   });
-      //   setWordCards((prev) => {
-      //     const shuffled = shuffleArray(prev);
-      //     return shuffled;
-      //   });
-      // }, 550);
-      // EndTest
 
       // Return to playing state
       setTimeout(() => setGameState("playing"), 300);
@@ -379,16 +364,41 @@ export default function MatchingGame({
       );
 
       // 1) Fade-out old cards (visual only)
-      setImageCards((prev) =>
-        prev.map((c) =>
-          c.originalId === matchedOriginalId ? { ...c, replacing: true } : c
-        )
-      );
-      setWordCards((prev) =>
-        prev.map((c) =>
-          c.originalId === matchedOriginalId ? { ...c, replacing: true } : c
-        )
-      );
+      if (availableItems.length === 0) {
+        const unusedMatches = usedItemIds.filter((it) => !it.match);
+        if (unusedMatches.length !== 0) {
+          const getItem =
+            unusedMatches.find((it) => it.id === matchedOriginalId) ||
+            unusedMatches[0];
+          if (getItem) {
+            setImageCards((prev) =>
+              prev.map((c) =>
+                c.originalId === matchedOriginalId
+                  ? { ...c, replacing: false }
+                  : c
+              )
+            );
+            setWordCards((prev) =>
+              prev.map((c) =>
+                c.originalId === matchedOriginalId
+                  ? { ...c, replacing: false }
+                  : c
+              )
+            );
+          }
+        }
+      } else {
+        setImageCards((prev) =>
+          prev.map((c) =>
+            c.originalId === matchedOriginalId ? { ...c, replacing: true } : c
+          )
+        );
+        setWordCards((prev) =>
+          prev.map((c) =>
+            c.originalId === matchedOriginalId ? { ...c, replacing: true } : c
+          )
+        );
+      }
 
       // 2) After fade-out duration -> do atomic replace (remove old then insert new), then shuffle
       setTimeout(() => {
@@ -415,10 +425,9 @@ export default function MatchingGame({
             content: getItem.word,
             image: getItem.image,
             matched: true,
-            last: true,
             error: false,
             replacing: false,
-            entering: true,
+            entering: false,
           };
           const newWordCard = {
             id: `${getItem.id}-word-${uniqueBase}`,
@@ -426,32 +435,21 @@ export default function MatchingGame({
             type: "word",
             content: getItem.word,
             matched: true,
-            last: true,
             error: false,
             replacing: false,
-            entering: true,
+            entering: false,
           };
 
-          // Remove old pair(s) with matchedOriginalId then insert new pair, then shuffle
           setImageCards((prev) => {
-            const cleaned = prev.filter(
-              (c) => c.originalId !== matchedOriginalId
+            return prev.map((c) =>
+              c.originalId === matchedOriginalId ? newImageCard : c
             );
-            const next = shuffleArray([...cleaned, newImageCard]).slice(
-              0,
-              prev.length || undefined
-            );
-            return next;
           });
+
           setWordCards((prev) => {
-            const cleaned = prev.filter(
-              (c) => c.originalId !== matchedOriginalId
+            return prev.map((c) =>
+              c.originalId === matchedOriginalId ? newWordCard : c
             );
-            const next = shuffleArray([...cleaned, newWordCard]).slice(
-              0,
-              prev.length || undefined
-            );
-            return next;
           });
 
           // mark reused item as used (if you track usedItemIds)
@@ -481,7 +479,7 @@ export default function MatchingGame({
             content: newItem.word,
             image: newItem.image,
             matched: false,
-            last: false,
+
             error: false,
             replacing: false,
             entering: true,
@@ -492,7 +490,7 @@ export default function MatchingGame({
             type: "word",
             content: newItem.word,
             matched: false,
-            last: false,
+
             error: false,
             replacing: false,
             entering: true,
@@ -500,26 +498,15 @@ export default function MatchingGame({
 
           // IMPORTANT: remove old pair first, then insert new, then shuffle immediately
           setImageCards((prev) => {
-            const cleaned = prev.filter(
-              (c) => c.originalId !== matchedOriginalId
+            return prev.map((c) =>
+              c.originalId === matchedOriginalId ? newImageCard : c
             );
-            // ensure we didn't accidentally remove nothing — but cleaned length should be prev.length - countRemoved
-            const next = shuffleArray([...cleaned, newImageCard]).slice(
-              0,
-              prev.length || undefined
-            );
-            return next;
           });
 
           setWordCards((prev) => {
-            const cleaned = prev.filter(
-              (c) => c.originalId !== matchedOriginalId
+            return prev.map((c) =>
+              c.originalId === matchedOriginalId ? newWordCard : c
             );
-            const next = shuffleArray([...cleaned, newWordCard]).slice(
-              0,
-              prev.length || undefined
-            );
-            return next;
           });
         }
 
