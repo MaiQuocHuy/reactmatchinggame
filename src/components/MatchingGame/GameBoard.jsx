@@ -10,9 +10,17 @@ import styles from "./MatchingGame.module.css";
  * @param {Object} props.selected - Currently selected card IDs
  * @param {Function} props.onCardClick - Callback function for card click events
  * @param {boolean} props.disabled - Whether the board is disabled (e.g., during animations)
+ * @param {Function} props.onCardAnimationEnd - Handler for card animation end events
  * @returns {JSX.Element}
  */
-function GameBoard({ imageCards, wordCards, selected, onCardClick, disabled }) {
+function GameBoard({
+  imageCards,
+  wordCards,
+  selected,
+  onCardClick,
+  disabled,
+  onCardAnimationEnd,
+}) {
   return (
     <main className={styles.gameBoard}>
       {/* Image Grid */}
@@ -24,6 +32,7 @@ function GameBoard({ imageCards, wordCards, selected, onCardClick, disabled }) {
             isSelected={selected.imageId === card.id}
             onClick={() => onCardClick(card.id, "image")}
             disabled={disabled}
+            onAnimationEnd={onCardAnimationEnd}
           />
         ))}
       </div>
@@ -37,6 +46,7 @@ function GameBoard({ imageCards, wordCards, selected, onCardClick, disabled }) {
             isSelected={selected.wordId === card.id}
             onClick={() => onCardClick(card.id, "word")}
             disabled={disabled}
+            onAnimationEnd={onCardAnimationEnd}
           />
         ))}
       </div>

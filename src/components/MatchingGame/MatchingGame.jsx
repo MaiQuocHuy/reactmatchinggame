@@ -76,6 +76,8 @@ export default function MatchingGame({
   // Refs
   const timerIntervalRef = useRef(null);
   const soundEnabledRef = useRef(false);
+  const nextCardIdRef = useRef(initialPairs * 2); // Start after initial cards
+  // const enteringCardsRef = useRef(new Set()); // Track cards currently entering
 
   // Sound hooks with graceful fallback
   const [playSelect] = useSound(selectSfx || "", {
@@ -138,7 +140,15 @@ export default function MatchingGame({
     setFloatingScores([]);
     setMatchedPairsCount(0);
     setIsWin(false);
-    setUsedItemIds(selectedItems.map((item) => item.id)); // Track initial items as used
+    setUsedItemIds(
+      selectedItems.map((item) => {
+        return {
+          ...item,
+          id: item.id,
+          match: false,
+        };
+      })
+    ); // Track initial items as used
     setGameState("playing");
 
     // Start timer
@@ -158,7 +168,7 @@ export default function MatchingGame({
         }
         return prev - 1;
       });
-    }, 1000);
+    }, 1500);
   }, [data, initialPairs, timerLength]);
 
   // Cleanup timer on unmount
@@ -181,6 +191,14 @@ export default function MatchingGame({
       imageCards.every((c) => c.matched) &&
       wordCards.every((c) => c.matched);
 
+    console.log("Win Check:", {
+      allItemsUsed,
+      allCardsMatched,
+      usedItemIds,
+      imageCards,
+      wordCards,
+    });
+
     if (allItemsUsed && allCardsMatched) {
       // All items matched - player wins!
       setTimeout(() => {
@@ -189,9 +207,16 @@ export default function MatchingGame({
         }
         setIsWin(true);
         setGameState("finished");
-      }, 600);
+      }, 1500);
     }
-  }, [usedItemIds, imageCards, wordCards, gameState, data.length]);
+  }, [
+    usedItemIds,
+    usedItemIds.length,
+    imageCards,
+    wordCards,
+    gameState,
+    data.length,
+  ]);
 
   // Handle card selection
   const handleCardClick = (cardId, type) => {
@@ -252,16 +277,28 @@ export default function MatchingGame({
     if (isMatch) {
       // Correct match!
       // const matchScore = 50 + Math.floor(timer / 2);
+      const newMatchedPairsCount = matchedPairsCount + 1;
       const matchScore = 50;
       setScore((prev) => prev + matchScore);
 
       // Increment matched pairs count
-      setMatchedPairsCount((prev) => prev + 1);
+      // setMatchedPairsCount((prev) => prev + 1);
+      setMatchedPairsCount(newMatchedPairsCount);
 
       // Play match sound
       if (matchSfx) {
         playMatch();
       }
+
+      setUsedItemIds((prev) => {
+        if (!prev.find((item) => item.id === imageCard.originalId)) {
+          return [
+            ...prev,
+            { ...imageCard, id: imageCard.originalId, match: true },
+          ];
+        }
+        return prev;
+      });
 
       // Create floating score animation
       const floatingId = `${Date.now()}-${Math.random()}`;
@@ -280,38 +317,36 @@ export default function MatchingGame({
         setFloatingScores((prev) => prev.filter((fs) => fs.id !== floatingId));
       }, 1500);
 
-      // Immediately mark as matched
-      setImageCards((prev) =>
-        prev.map((c) => (c.id === imageId ? { ...c, matched: true } : c))
-      );
-      setWordCards((prev) =>
-        prev.map((c) => (c.id === wordId ? { ...c, matched: true } : c))
-      );
+      // Helper to update card state
+      const updateCardState = (cardId, state) => {
+        const updateFn = (prev) =>
+          prev.map((c) => (c.id === cardId ? { ...c, ...state } : c));
+        return updateFn;
+      };
 
+      // Immediately mark as matched
+      setImageCards(updateCardState(imageId, { matched: true }));
+      setWordCards(updateCardState(wordId, { matched: true }));
       // Clear selection
       setSelected({});
 
-      // Replace matched cards after brief animation
       setTimeout(() => {
-        replaceMatchedPair(imageCard.originalId);
-      }, 250);
+        triggerReplaceAnimation(imageCard.originalId);
+      }, 480);
+      // setTimeout(() => {
+      //   // Shuffle positions within each column
+      //   setImageCards((prev) => {
+      //     const shuffled = shuffleArray(prev);
+      //     return shuffled;
+      //   });
+      //   setWordCards((prev) => {
+      //     const shuffled = shuffleArray(prev);
+      //     return shuffled;
+      //   });
+      // }, 550);
+      // EndTest
 
-      // Shuffle positions AFTER replace animation completes (non-blocking)
-      setTimeout(() => {
-        requestAnimationFrame(() => {
-          // Shuffle positions within each column
-          setImageCards((prev) => {
-            const shuffled = shuffleArray(prev);
-            return shuffled;
-          });
-          setWordCards((prev) => {
-            const shuffled = shuffleArray(prev);
-            return shuffled;
-          });
-        });
-      }, 550); // Wait for replace animation to complete (250ms + 300ms animation)
-
-      // Return to playing state immediately
+      // Return to playing state
       setTimeout(() => setGameState("playing"), 300);
     } else {
       // Incorrect match
@@ -319,150 +354,214 @@ export default function MatchingGame({
         playError();
       }
 
+      // Helper to update card state
+      const updateCardState = (cardId, state) => (prev) =>
+        prev.map((c) => (c.id === cardId ? { ...c, ...state } : c));
+
       // Show error animation
-      setImageCards((prev) =>
-        prev.map((c) => (c.id === imageId ? { ...c, error: true } : c))
-      );
-      setWordCards((prev) =>
-        prev.map((c) => (c.id === wordId ? { ...c, error: true } : c))
-      );
+      setImageCards(updateCardState(imageId, { error: true }));
+      setWordCards(updateCardState(wordId, { error: true }));
 
       // Remove error state and selection after showing error
       setTimeout(() => {
-        setImageCards((prev) =>
-          prev.map((c) => (c.id === imageId ? { ...c, error: false } : c))
-        );
-        setWordCards((prev) =>
-          prev.map((c) => (c.id === wordId ? { ...c, error: false } : c))
-        );
+        setImageCards(updateCardState(imageId, { error: false }));
+        setWordCards(updateCardState(wordId, { error: false }));
         setSelected({});
         setGameState("playing");
-      }, 800); // Increased to 800ms to give user more time to see the error
+      }, 800);
     }
   };
 
-  // Replace matched pair with new items
-  const replaceMatchedPair = useCallback(
+  const executeCardReplacement = useCallback(
     (matchedOriginalId) => {
-      // Find new items that haven't been used yet
       const availableItems = data.filter(
-        (item) => !usedItemIds.includes(item.id)
+        (item) => !usedItemIds.some((used) => used.id === item.id)
       );
 
-      if (availableItems.length === 0) {
-        // No more items to replace with
-        return;
-      }
+      // 1) Fade-out old cards (visual only)
+      setImageCards((prev) =>
+        prev.map((c) =>
+          c.originalId === matchedOriginalId ? { ...c, replacing: true } : c
+        )
+      );
+      setWordCards((prev) =>
+        prev.map((c) =>
+          c.originalId === matchedOriginalId ? { ...c, replacing: true } : c
+        )
+      );
 
-      // Pick a random new item
-      const newItem =
-        availableItems[Math.floor(Math.random() * availableItems.length)];
-
-      // Mark this item as used
-      setUsedItemIds((prev) => [...prev, newItem.id]);
-
-      // Add to deck (optimized - avoid filter)
-      setDeck((prev) => {
-        const filtered = prev.filter((item) => item.id !== matchedOriginalId);
-        filtered.push(newItem);
-        return filtered;
-      });
-
-      // Create new cards with simple ID generation
-      const timestamp = Date.now();
-      const newImageId = timestamp;
-      const newWordId = timestamp + 1;
-
-      const newImageCard = {
-        id: newImageId,
-        originalId: newItem.id,
-        type: "image",
-        content: newItem.word,
-        image: newItem.image,
-        matched: false,
-        error: false,
-        replacing: true,
-        entering: false,
-      };
-
-      const newWordCard = {
-        id: newWordId,
-        originalId: newItem.id,
-        type: "word",
-        content: newItem.word,
-        matched: false,
-        error: false,
-        replacing: true,
-        entering: false,
-      };
-
-      // Replace cards (single operation per setState)
-      setImageCards((prev) => {
-        const index = prev.findIndex((c) => c.originalId === matchedOriginalId);
-        if (index === -1) return prev;
-        const newCards = [...prev];
-        newCards[index] = newImageCard;
-        return newCards;
-      });
-
-      setWordCards((prev) => {
-        const index = prev.findIndex((c) => c.originalId === matchedOriginalId);
-        if (index === -1) return prev;
-        const newCards = [...prev];
-        newCards[index] = newWordCard;
-        return newCards;
-      });
-
-      // Remove replacing state and add entering animation after old card fades out
+      // 2) After fade-out duration -> do atomic replace (remove old then insert new), then shuffle
       setTimeout(() => {
-        requestAnimationFrame(() => {
+        // ---------- choose item ----------
+        // if no available items -> try reuse from usedItemIds where match===false
+        if (availableItems.length === 0) {
+          const unusedMatches = usedItemIds.filter((it) => !it.match);
+          if (unusedMatches.length === 0) {
+            // nothing to replace with
+            return;
+          }
+          // find the reused item by original id (match original behavior)
+          const getItem =
+            unusedMatches.find((it) => it.id === matchedOriginalId) ||
+            unusedMatches[0];
+
+          if (!getItem) return;
+
+          const uniqueBase = Date.now();
+          const newImageCard = {
+            id: `${getItem.id}-img-${uniqueBase}`,
+            originalId: getItem.id,
+            type: "image",
+            content: getItem.word,
+            image: getItem.image,
+            matched: true,
+            last: true,
+            error: false,
+            replacing: false,
+            entering: true,
+          };
+          const newWordCard = {
+            id: `${getItem.id}-word-${uniqueBase}`,
+            originalId: getItem.id,
+            type: "word",
+            content: getItem.word,
+            matched: true,
+            last: true,
+            error: false,
+            replacing: false,
+            entering: true,
+          };
+
+          // Remove old pair(s) with matchedOriginalId then insert new pair, then shuffle
           setImageCards((prev) => {
-            const index = prev.findIndex((c) => c.id === newImageId);
-            if (index === -1) return prev;
-            const newCards = [...prev];
-            newCards[index] = {
-              ...newCards[index],
-              replacing: false,
-              entering: true,
-            };
-            return newCards;
+            const cleaned = prev.filter(
+              (c) => c.originalId !== matchedOriginalId
+            );
+            const next = shuffleArray([...cleaned, newImageCard]).slice(
+              0,
+              prev.length || undefined
+            );
+            return next;
           });
           setWordCards((prev) => {
-            const index = prev.findIndex((c) => c.id === newWordId);
-            if (index === -1) return prev;
-            const newCards = [...prev];
-            newCards[index] = {
-              ...newCards[index],
-              replacing: false,
-              entering: true,
-            };
-            return newCards;
+            const cleaned = prev.filter(
+              (c) => c.originalId !== matchedOriginalId
+            );
+            const next = shuffleArray([...cleaned, newWordCard]).slice(
+              0,
+              prev.length || undefined
+            );
+            return next;
           });
-        });
 
-        // Remove entering class after animation completes
-        setTimeout(() => {
-          requestAnimationFrame(() => {
-            setImageCards((prev) => {
-              const index = prev.findIndex((c) => c.id === newImageId);
-              if (index === -1) return prev;
-              const newCards = [...prev];
-              newCards[index] = { ...newCards[index], entering: false };
-              return newCards;
-            });
-            setWordCards((prev) => {
-              const index = prev.findIndex((c) => c.id === newWordId);
-              if (index === -1) return prev;
-              const newCards = [...prev];
-              newCards[index] = { ...newCards[index], entering: false };
-              return newCards;
-            });
+          // mark reused item as used (if you track usedItemIds)
+          setUsedItemIds((prev) =>
+            prev.map((u) => (u.id === getItem.id ? { ...u, match: true } : u))
+          );
+        } else {
+          // ---------- have available items -> pick new ----------
+          const newItem =
+            availableItems[Math.floor(Math.random() * availableItems.length)];
+          if (!newItem) return;
+
+          // add to usedItemIds (match:false)
+          setUsedItemIds((prev) => [
+            ...prev,
+            { ...newItem, id: newItem.id, match: false },
+          ]);
+
+          // create unique ids (use timestamp + random to be safe)
+          const uniqueBase = `${Date.now()}-${Math.floor(
+            Math.random() * 1000
+          )}`;
+          const newImageCard = {
+            id: `img-${uniqueBase}`,
+            originalId: newItem.id,
+            type: "image",
+            content: newItem.word,
+            image: newItem.image,
+            matched: false,
+            last: false,
+            error: false,
+            replacing: false,
+            entering: true,
+          };
+          const newWordCard = {
+            id: `word-${uniqueBase}`,
+            originalId: newItem.id,
+            type: "word",
+            content: newItem.word,
+            matched: false,
+            last: false,
+            error: false,
+            replacing: false,
+            entering: true,
+          };
+
+          // IMPORTANT: remove old pair first, then insert new, then shuffle immediately
+          setImageCards((prev) => {
+            const cleaned = prev.filter(
+              (c) => c.originalId !== matchedOriginalId
+            );
+            // ensure we didn't accidentally remove nothing — but cleaned length should be prev.length - countRemoved
+            const next = shuffleArray([...cleaned, newImageCard]).slice(
+              0,
+              prev.length || undefined
+            );
+            return next;
           });
-        }, 500); // Match animation duration
-      }, 300);
+
+          setWordCards((prev) => {
+            const cleaned = prev.filter(
+              (c) => c.originalId !== matchedOriginalId
+            );
+            const next = shuffleArray([...cleaned, newWordCard]).slice(
+              0,
+              prev.length || undefined
+            );
+            return next;
+          });
+        }
+
+        // 3) cleanup entering after fade-in completes
+        setTimeout(() => {
+          setImageCards((prev) =>
+            prev.map((c) => (c.entering ? { ...c, entering: false } : c))
+          );
+          setWordCards((prev) =>
+            prev.map((c) => (c.entering ? { ...c, entering: false } : c))
+          );
+        }, 500); // match your CSS fade-in duration
+      }, 300); // match your CSS fade-out duration
     },
-    [data, usedItemIds]
+    // include everything that function reads
+    [data, usedItemIds, shuffleArray] // adjust deps (see notes)
   );
+
+  const triggerReplaceAnimation = (matchedOriginalId) => {
+    executeCardReplacement(matchedOriginalId);
+  };
+
+  // Test
+
+  // Handle animation end events from Card components
+  const handleCardAnimationEnd = useCallback((event, cardId, cardType) => {
+    if (event.animationName !== "fadeInScale") return;
+
+    // Entering animation completed - clean up entering state
+    const setCards = cardType === "image" ? setImageCards : setWordCards;
+
+    setCards((prev) => {
+      const index = prev.findIndex((c) => c.id === cardId);
+      if (index === -1) return prev;
+      const newCards = [...prev];
+      newCards[index] = { ...newCards[index], entering: false };
+      return newCards;
+    });
+
+    // Remove this card from entering tracking
+    // enteringCardsRef.current.delete(cardId);
+  }, []);
 
   return (
     <div className={styles.gameContainer}>
@@ -495,6 +594,7 @@ export default function MatchingGame({
                   score={score}
                   maxScore={data.length * 50}
                   matchedPairs={matchedPairsCount}
+                  totalPairs={data.length}
                   isWin={isWin}
                   onStart={initializeGame}
                 />
@@ -507,6 +607,7 @@ export default function MatchingGame({
                 selected={selected}
                 onCardClick={handleCardClick}
                 disabled={gameState === "verifying" || gameState === "finished"}
+                onCardAnimationEnd={handleCardAnimationEnd}
               />
             </div>
           </div>

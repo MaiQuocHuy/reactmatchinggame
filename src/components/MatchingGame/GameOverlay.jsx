@@ -8,6 +8,7 @@ import styles from "./MatchingGame.module.css";
  * @param {number} props.score - Final score (for end screen)
  * @param {number} props.maxScore - Maximum possible score (for end screen)
  * @param {number} props.matchedPairs - Number of matched pairs (for end screen)
+ * @param {number} props.totalPairs - Total number of pairs in the game (for end screen)
  * @param {boolean} props.isWin - Whether the player won (completed all matches) or lost (time ran out)
  * @param {Function} props.onStart - Callback when start button clicked
  * @returns {JSX.Element}
@@ -18,6 +19,7 @@ export default function GameOverlay({
   score,
   maxScore,
   matchedPairs,
+  totalPairs,
   isWin,
   onStart,
 }) {
@@ -39,9 +41,6 @@ export default function GameOverlay({
   if (type === "end") {
     const scorePercentage =
       maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
-
-    // Assuming average of 5 seconds per match
-    const totalPairs = maxScore / 50; // Each pair = 50 points
 
     // Determine result message
     const resultMessage = isWin
