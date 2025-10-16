@@ -51,54 +51,54 @@ export const masterItems = [
     image: "https://api.iconify.design/mdi/guitar-electric.svg?color=%23F59E0B",
     word: "Guitar",
   },
-  {
-    id: 11,
-    image: "https://api.iconify.design/mdi/home.svg?color=%238B5CF6",
-    word: "House",
-  },
-  {
-    id: 12,
-    image: "https://api.iconify.design/mdi/pizza.svg?color=%23EF4444",
-    word: "Pizza",
-  },
-  {
-    id: 13,
-    image: "https://api.iconify.design/mdi/rainbow.svg?color=%2310B981",
-    word: "Rainbow",
-  },
-  {
-    id: 14,
-    image: "https://api.iconify.design/mdi/star.svg?color=%23F59E0B",
-    word: "Star",
-  },
-  {
-    id: 15,
-    image: "https://api.iconify.design/mdi/wave.svg?color=%233B82F6",
-    word: "Wave",
-  },
-  {
-    id: 16,
-    image: "https://api.iconify.design/mdi/palette.svg?color=%23EC4899",
-    word: "Art",
-  },
-  {
-    id: 17,
-    image: "https://api.iconify.design/mdi/fire.svg?color=%23DC2626",
-    word: "Fire",
-  },
-  {
-    id: 18,
-    image: "https://api.iconify.design/mdi/diamond.svg?color=%2306B6D4",
-    word: "Diamond",
-  },
-  {
-    id: 19,
-    image: "https://api.iconify.design/mdi/drama-masks.svg?color=%238B5CF6",
-    word: "Theater",
-  },
-  {
-    id: 20,
-    image: "https://api.iconify.design/mdi/rocket.svg?color=%236366F1",
-    word: "Rocket",
-  },
+  // {
+  //   id: 11,
+  //   image: "https://api.iconify.design/mdi/home.svg?color=%238B5CF6",
+  //   word: "House",
+  // },
+  // {
+  //   id: 12,
+  //   image: "https://api.iconify.design/mdi/pizza.svg?color=%23EF4444",
+  //   word: "Pizza",
+  // },
+  // {
+  //   id: 13,
+  //   image: "https://api.iconify.design/mdi/rainbow.svg?color=%2310B981",
+  //   word: "Rainbow",
+  // },
+  // {
+  //   id: 14,
+  //   image: "https://api.iconify.design/mdi/star.svg?color=%23F59E0B",
+  //   word: "Star",
+  // },
+  // {
+  //   id: 15,
+  //   image: "https://api.iconify.design/mdi/wave.svg?color=%233B82F6",
+  //   word: "Wave",
+  // },
+  // {
+  //   id: 16,
+  //   image: "https://api.iconify.design/mdi/palette.svg?color=%23EC4899",
+  //   word: "Art",
+  // },
+  // {
+  //   id: 17,
+  //   image: "https://api.iconify.design/mdi/fire.svg?color=%23DC2626",
+  //   word: "Fire",
+  // },
+  // {
+  //   id: 18,
+  //   image: "https://api.iconify.design/mdi/diamond.svg?color=%2306B6D4",
+  //   word: "Diamond",
+  // },
+  // {
+  //   id: 19,
+  //   image: "https://api.iconify.design/mdi/drama-masks.svg?color=%238B5CF6",
+  //   word: "Theater",
+  // },
+  // {
+  //   id: 20,
+  //   image: "https://api.iconify.design/mdi/rocket.svg?color=%236366F1",
+  //   word: "Rocket",
+  // },
 ];

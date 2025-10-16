@@ -8,26 +8,35 @@ import styles from "./MatchingGame.module.css";
  * @param {boolean} props.isSelected - Whether the card is currently selected
  * @param {Function} props.onClick - Click handler for the card
  * @param {boolean} props.disabled - Whether the card is disabled
+ * @param {Function} props.onAnimationEnd - Handler for animation end events
  * @returns {JSX.Element}
  */
-function Card({ card, isSelected, onClick, disabled }) {
+function Card({ card, isSelected, onClick, disabled, onAnimationEnd }) {
   const cardClasses = [
     styles.card,
     card.type === "image" ? styles.cardImage : styles.cardWord,
     isSelected && styles.selected,
-    card.matched && styles.matched,
+    // card.matched && !card.last && styles.matched,
     card.error && styles.error,
     card.replacing && styles.replacing,
     card.entering && styles.entering,
+    card.last ? styles.last : card.matched && styles.matched,
   ]
     .filter(Boolean)
     .join(" ");
+
+  const handleAnimationEnd = (e) => {
+    if (onAnimationEnd) {
+      onAnimationEnd(e, card.id, card.type);
+    }
+  };
 
   return (
     <button
       className={cardClasses}
       onClick={onClick}
       disabled={disabled || card.matched}
+      onAnimationEnd={handleAnimationEnd}
       role="button"
       aria-pressed={isSelected}
       aria-label={`${card.type} card: ${card.content}`}

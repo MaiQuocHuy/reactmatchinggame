@@ -297,7 +297,10 @@
   touch-action: manipulation;
   /* GPU acceleration for better performance */
   will-change: transform;
-  transform: translateZ(0); /* Force GPU layer */
+  /* transform: translateZ(0); */
+
+  /* test */
+  transform: scale(1) opacity(1);
 }
 
 /* Hover effects (desktop only) */
@@ -366,15 +369,68 @@
 }
 
 /* Matched state */
+
+@keyframes fadeInScale {
+  from {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* .card.matched {
+  background: #4ade80;
+  color: white;
+  transform: scale(0) translateZ(0);
+  opacity: 0;
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.45s ease-in-out, background-color 0.3s ease;
+  pointer-events: none;
+  cursor: default;
+} */
+
 .card.matched {
   background: #4ade80; /* green-400 */
-  color: white;
-  transform: scale(0.95) translateZ(0); /* Combine transforms */
-  opacity: 0.6;
+  transform: scale(0);
+  opacity: 0;
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.45s ease-in-out, background-color 0.3s ease;
   pointer-events: none;
   cursor: default;
 }
 
+/* .card.last {
+  background: #4ade80;
+  transform: scale(1);
+  opacity: 0.8;
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.45s ease-in-out, background-color 0.3s ease;
+  pointer-events: none;
+  cursor: default;
+} */
+@keyframes fadeToLast {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+}
+
+.card.last {
+  background: #4ade80; /* green-400 */
+  animation: fadeToLast 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  pointer-events: none;
+  cursor: default;
+  will-change: transform, opacity;
+}
+
+.card.last,
 .card.matched .word {
   color: white;
 }
@@ -386,24 +442,41 @@
 }
 
 /* Replacing state (fade out) */
-.card.replacing {
-  transform: scale(0) translateZ(0); /* Combine transforms to keep GPU layer */
+/* Fade out (replacing) */
+/* .card.replacing {
+  transform: scale(0) translateZ(0);
   opacity: 0;
-  transition: transform 0.3s ease-in, opacity 0.3s ease-in;
-  will-change: transform, opacity; /* GPU acceleration hint */
-  pointer-events: none; /* Disable interaction during animation */
+  transition: transform 0.35s ease-in, opacity 0.35s ease-in;
+  pointer-events: none;
 }
 
 .card.entering {
-  animation: fadeInScale 1s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+  transform: scale(1);
+  opacity: 1;
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.45s ease-out;
+  pointer-events: none;
+} */
+.card.replacing {
+  transform: scale(0) translateZ(0);
+  opacity: 0;
+  transition: transform 0.3s ease-out, opacity 0.3s ease-out; /* Short transition for cleanup */
 }
 
+/* Change entering to use keyframe for better event handling */
+.card.entering {
+  animation: fadeInScale 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  pointer-events: none;
+  cursor: default;
+}
+
+/* Reuse your existing keyframe, but make it match the transition curve */
 @keyframes fadeInScale {
-  0% {
-    transform: scale(0.8);
+  from {
+    transform: scale(0);
     opacity: 0;
   }
-  100% {
+  to {
     transform: scale(1);
     opacity: 1;
   }
@@ -413,53 +486,9 @@
    Keyframe Animations
    =================================== */
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
+/* Used when new cards fade in after a match */
 
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes selectPulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.08);
-  }
-  100% {
-    transform: scale(1.05);
-  }
-}
-
-@keyframes matchPulse {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.1);
-    opacity: 0.8;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
+/* Used when cards don't match (shake animation) */
 @keyframes shake {
   0%,
   100% {
@@ -480,17 +509,7 @@
   }
 }
 
-@keyframes fadeReplace {
-  0% {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
+/* Used for floating score display */
 @keyframes floatUp {
   0% {
     transform: translateY(0) scale(1);
