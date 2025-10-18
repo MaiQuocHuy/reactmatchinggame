@@ -5,9 +5,10 @@ import styles from "./MatchingGame.module.css";
  * @param {Object} props
  * @param {number} props.score - Current game score
  * @param {number} props.timer - Remaining time in seconds
+ * @param {Function} props.onBackToHome - Callback when back to home button clicked
  * @returns {JSX.Element}
  */
-export default function Header({ score, timer }) {
+export default function Header({ score, timer, onBackToHome }) {
   return (
     <header className={styles.header}>
       <div
@@ -28,6 +29,16 @@ export default function Header({ score, timer }) {
         <span className={styles.label}>Score:</span>
         <span className={styles.value}>{score}</span>
       </div>
+      <button
+        className={styles.headerBackButton}
+        onClick={() => {
+          console.log("Header Back button clicked");
+          onBackToHome && onBackToHome();
+        }}
+        aria-label="Back to home screen"
+      >
+        🏠 Home
+      </button>
     </header>
   );
 }

@@ -22,6 +22,7 @@ export default function GameOverlay({
   totalPairs,
   isWin,
   onStart,
+  timeFinished,
 }) {
   if (type === "start") {
     return (
@@ -43,16 +44,21 @@ export default function GameOverlay({
       maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
 
     // Determine result message
-    const resultMessage = isWin
-      ? "You Win!"
-      : matchedPairs === 0
-      ? "Failed - Try Again!"
-      : "Time's Up!";
+    const resultMessage = isWin ? "Perfect!" : "Time's Up!";
 
     const resultEmoji = isWin ? "🎉" : matchedPairs === 0 ? "😔" : "⏰";
 
+    const resultTextSuggestion = isWin
+      ? "Congratulations! You got them all correct! 🏆"
+      : "Good try! Keep practicing and you'll do even better! 💪✨";
+
     return (
-      <div className={styles.gameOverOverlay}>
+      <div
+        className={styles.gameOverOverlay}
+        style={{
+          background: !isWin ? "#ff5722bf" : "#4caf50cc",
+        }}
+      >
         <div className={styles.gameOverContent}>
           <div className={styles.gameOverHeader}>
             <span className={styles.partyEmoji}>{resultEmoji}</span>
@@ -63,18 +69,36 @@ export default function GameOverlay({
             >
               {resultMessage}
             </h2>
-            <span className={styles.partyEmoji}>{resultEmoji}</span>
+            {/* <span className={styles.partyEmoji}>{resultEmoji}</span> */}
+          </div>
+          <p className={styles.resultSuggestion}>{resultTextSuggestion}</p>
+
+          <div className={styles.scoreStats}>
+            <span className={styles.scoreLabel}>Final score:</span>
+            <span className={styles.userScore}>{score}</span>
           </div>
 
           <div className={styles.statsContainer}>
             <div className={styles.matchedStats}>
-              <span className={styles.matchedLabel}>Matched Pairs</span>
+              <span className={styles.matchedLabel}>Questions:</span>
+              <span className={styles.matchedValue}>{totalPairs || 0}</span>
+            </div>
+            <div className={styles.matchedStats}>
+              <span className={styles.matchedLabel}>Correct:</span>
+              <span className={styles.matchedValue}>{matchedPairs || 0}</span>
+            </div>
+            <div className={styles.matchedStats}>
+              <span className={styles.matchedLabel}>Accurancy:</span>
               <span className={styles.matchedValue}>
-                {matchedPairs || 0} / {totalPairs}
+                {scorePercentage || 0}%
               </span>
             </div>
+            <div className={styles.matchedStats}>
+              <span className={styles.matchedLabel}>Time:</span>
+              <span className={styles.matchedValue}>{timeFinished || 0}s</span>
+            </div>
 
-            <div className={styles.scoreStats}>
+            {/* <div className={styles.scoreStats}>
               <span className={styles.scoreLabel}>Your Score</span>
               <div className={styles.scoreComparison}>
                 <span className={styles.userScore}>{score}</span>
@@ -84,11 +108,11 @@ export default function GameOverlay({
               <div className={styles.scorePercentage}>
                 {scorePercentage}% Complete
               </div>
-            </div>
+            </div> */}
           </div>
 
           <button className={styles.playAgainButton} onClick={onStart}>
-            {isWin ? "Play Again" : "Try Again"}
+            Play Again
           </button>
         </div>
       </div>
